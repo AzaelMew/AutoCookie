@@ -248,7 +248,13 @@ AC.Auto = function(name, desc, timeCreated, actionFunction, setting) {
 AC.Auto.prototype.run = function(runImmediately, interval) {
 	runImmediately ??= false;
 	interval ??= this.Interval ?? 0;
-	
+
+	// Clamp interval to the slider's min/max so old save data can't push it out of range
+	var s = this.settings['Interval'];
+	if (s && typeof interval === 'number' && interval > 0) {
+		interval = Math.max(s.min, Math.min(s.max, interval));
+	}
+
 	// Stop the action function if it is running
 	this.intvlID = clearInterval(this.intvlID);
 	
