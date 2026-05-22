@@ -302,11 +302,11 @@ new AC.Auto('Golden Cookie Clicker', 'Clicks golden cookies and other shimmers a
 	'desc': 'How often to check for golden cookies.',
 	'type': 'slider',
 	'timeCreated': 202101172102,
-	'value': 100,
+	'value': 0,
 	'units': 'ms',
-	'min': 1,
+	'min': 0,
 	'max': 5000,
-	'step': 10
+	'step': 50
 }, {
 	'name': 'Click Wrath Cookies',
 	'desc': 'Whether or not to click wrath cookies.',
@@ -335,11 +335,11 @@ new AC.Auto('Fortune Clicker', 'Clicks on fortunes in the news ticker as they ap
 	'desc': 'How often to check for fortunes.',
 	'type': 'slider',
 	'timeCreated': 202101172103,
-	'value': 100,
+	'value': 0,
 	'units': 'ms',
-	'min': 1,
+	'min': 0,
 	'max': 10000,
-	'step': 10
+	'step': 100
 });
 
 /**
