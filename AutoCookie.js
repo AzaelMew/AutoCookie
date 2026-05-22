@@ -289,7 +289,7 @@ new AC.Auto('Autoclicker', 'Clicks the cookie once every interval.', 20210117205
 	'timeCreated': 202101172101,
 	'value': 1,
 	'units': 'ms',
-	'min': 1,
+	'min': 0,
 	'max': 500,
 	'step': 1
 });
