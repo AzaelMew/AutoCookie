@@ -14,7 +14,7 @@ var AC = {
 	'Settings': {},	// Settings
 	'Version': {	// Version Information
 		'CC': '2.052',
-		'AC': '0.257',
+		'AC': '0.258',
 	}
 }
 
@@ -278,14 +278,14 @@ new AC.Auto('Autoclicker', 'Clicks the cookie once every interval.', 20210117205
 	Game.ClickCookie();
 }, {
 	'name': 'Interval',
-	'desc': 'How often the cookie is clicked.',
+	'desc': 'How often the cookie is clicked. Lower = faster clicks.',
 	'type': 'slider',
 	'timeCreated': 202101172101,
-	'value': 0,
+	'value': 1,
 	'units': 'ms',
-	'min': 0,
-	'max': 1000,
-	'step': 10
+	'min': 1,
+	'max': 500,
+	'step': 1
 });
 
 /**
@@ -302,11 +302,11 @@ new AC.Auto('Golden Cookie Clicker', 'Clicks golden cookies and other shimmers a
 	'desc': 'How often to check for golden cookies.',
 	'type': 'slider',
 	'timeCreated': 202101172102,
-	'value': 0,
+	'value': 100,
 	'units': 'ms',
-	'min': 0,
+	'min': 1,
 	'max': 5000,
-	'step': 50
+	'step': 10
 }, {
 	'name': 'Click Wrath Cookies',
 	'desc': 'Whether or not to click wrath cookies.',
@@ -335,11 +335,11 @@ new AC.Auto('Fortune Clicker', 'Clicks on fortunes in the news ticker as they ap
 	'desc': 'How often to check for fortunes.',
 	'type': 'slider',
 	'timeCreated': 202101172103,
-	'value': 0,
+	'value': 100,
 	'units': 'ms',
-	'min': 0,
+	'min': 1,
 	'max': 10000,
-	'step': 100
+	'step': 10
 });
 
 /**
