@@ -15,8 +15,8 @@ Currently Auto Cookie can automate the following tasks.
 
 ## Source
 
-* [AutoCookie.js](https://elekester.github.io/AutoCookie/AutoCookie.js)
-* [GitHub](https://github.com/Elekester/AutoCookie)
+* [AutoCookie.js](https://azaelmew.github.io/AutoCookie/AutoCookie.js)
+* [GitHub](https://github.com/AzaelMew/AutoCookie)
 
 ## Using Auto Cookie
 
@@ -24,15 +24,15 @@ There's several different ways to load Auto Cookie into Cookie Clicker. The easi
 
 ### Cookie Clicker Mod Manager
 
-Add `Game.LoadMod('https://elekester.github.io/AutoCookie/AutoCookie.js');` to [Cookie Clicker Mod Manager](https://github.com/klattmose/CookieClickerModManager).
+Add `Game.LoadMod('https://azaelmew.github.io/AutoCookie/AutoCookie.js');` to [Cookie Clicker Mod Manager](https://github.com/klattmose/CookieClickerModManager).
 
 ### Bookmarklet
 
-Copy `javascript: (function () {Game.LoadMod('https://elekester.github.io/AutoCookie/AutoCookie.js');}());` and save it as a bookmark. Paste it in the URL section. To activate, click the bookmark when the game's open. You'll have to do this every time you start the game.
+Copy `javascript: (function () {Game.LoadMod('https://azaelmew.github.io/AutoCookie/AutoCookie.js');}());` and save it as a bookmark. Paste it in the URL section. To activate, click the bookmark when the game's open. You'll have to do this every time you start the game.
 
 ### Javascript Console
 
-Enter `Game.LoadMod('https://elekester.github.io/AutoCookie/AutoCookie.js');` into your broswer's javascript console when the game's open. You'll have to do this every time you start the game.
+Enter `Game.LoadMod('https://azaelmew.github.io/AutoCookie/AutoCookie.js');` into your broswer's javascript console when the game's open. You'll have to do this every time you start the game.
 
 ### Userscript
 
@@ -45,14 +45,14 @@ If you'd rather use the addon as a script using, for example, Greasemonkey or Ta
 // @include http://orteil.dashnet.org/cookieclicker/
 // @include https://orteil.dashnet.org/cookieclicker/
 // @author Elekester
-// @version 1
+// @version 2
 // @grant none
 // ==/UserScript==
 
 (function() {
     const launch = setInterval(function() {
         if (typeof Game.ready !== 'undefined' && Game.ready) {
-            Game.LoadMod('https://elekester.github.io/AutoCookie/AutoCookie.js');
+            Game.LoadMod('https://azaelmew.github.io/AutoCookie/AutoCookie.js');
             clearInterval(launch);
         }
     }, 1000);
