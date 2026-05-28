@@ -289,8 +289,8 @@ new AC.Auto('Autoclicker', 'Clicks the cookie once every interval.', 20210117205
 	'timeCreated': 202101172101,
 	'value': 1,
 	'switchVals': ['Off', 'On'],
-	'zeroOff': 1
-});
+	'zeroOff': 1,
+	'onValue': 1
 
 /**
  * This automated action clicks shimmers.
@@ -303,14 +303,13 @@ new AC.Auto('Golden Cookie Clicker', 'Clicks golden cookies and other shimmers a
 	}).bind(this));
 }, {
 	'name': 'Interval',
-	'desc': 'How often to check for golden cookies.',
-	'type': 'slider',
+	'desc': 'Toggle golden cookie clicker on or off.',
+	'type': 'switch',
 	'timeCreated': 202101172102,
 	'value': 0,
-	'units': 'ms',
-	'min': 0,
-	'max': 5000,
-	'step': 50
+	'switchVals': ['Off', 'On'],
+	'zeroOff': 1,
+	'onValue': 50
 }, {
 	'name': 'Click Wrath Cookies',
 	'desc': 'Whether or not to click wrath cookies.',
@@ -336,14 +335,13 @@ new AC.Auto('Fortune Clicker', 'Clicks on fortunes in the news ticker as they ap
 	if (Game.TickerEffect && Game.TickerEffect.type=='fortune') {Game.tickerL.click()}
 }, {
 	'name': 'Interval',
-	'desc': 'How often to check for fortunes.',
-	'type': 'slider',
+	'desc': 'Toggle fortune clicker on or off.',
+	'type': 'switch',
 	'timeCreated': 202101172103,
 	'value': 0,
-	'units': 'ms',
-	'min': 0,
-	'max': 10000,
-	'step': 100
+	'switchVals': ['Off', 'On'],
+	'zeroOff': 1,
+	'onValue': 100
 });
 
 /**
@@ -360,14 +358,13 @@ new AC.Auto('Elder Pledge Buyer', 'Buys the Elder pledge toggle when it is avail
 	}
 }, {
 	'name': 'Interval',
-	'desc': 'How often to check for the option to buy the Elder pledge toggle.',
-	'type': 'slider',
+	'desc': 'Toggle Elder pledge buyer on or off.',
+	'type': 'switch',
 	'timeCreated': 202101172104,
 	'value': 0,
-	'units': 'ms',
-	'min': 0,
-	'max': 5000,
-	'step': 50
+	'switchVals': ['Off', 'On'],
+	'zeroOff': 1,
+	'onValue': 50
 }, {
 	'name': 'Slow Down',
 	'desc': 'If Slow Down is on, Elder Pledge Buyer will wait until the timer on the current Elder pledge runs out before checking again.',
@@ -390,14 +387,13 @@ new AC.Auto('Wrinkler Popper', 'Pops wrinklers.', 202101172060, function() {
 	}
 }, {
 	'name': 'Interval',
-	'desc': 'How often to check for wrinklers to pop.',
-	'type': 'slider',
+	'desc': 'Toggle wrinkler popper on or off.',
+	'type': 'switch',
 	'timeCreated': 202101172106,
 	'value': 0,
-	'units': 'ms',
-	'min': 0,
-	'max': 3600000,
-	'step': 10000
+	'switchVals': ['Off', 'On'],
+	'zeroOff': 1,
+	'onValue': 10000
 }, {
 	'name': 'Preserve',
 	'desc': 'Will keep this many wrinklers alive.',
@@ -436,14 +432,13 @@ new AC.Auto('Godzamok Loop', 'Triggers Godzamok\'s Devastation buff by selling a
 	}
 }, {
 	'name': 'Interval',
-	'desc': 'How often to sell and buy back buildings.',
-	'type': 'slider',
+	'desc': 'Toggle Godzamok loop on or off.',
+	'type': 'switch',
 	'timeCreated': 202101172109,
 	'value': 0,
-	'units': 'ms',
-	'min': 0,
-	'max': 10050,
-	'step': 150
+	'switchVals': ['Off', 'On'],
+	'zeroOff': 1,
+	'onValue': 150
 }, {
 	'name': 'Sell Extra Cursors',
 	'desc': 'How many extra cursors to buy and sell back, in groups of 100. This will lag the game.',
@@ -606,19 +601,27 @@ AC.Display.addSetting = function(auto, setting) {
 		} else {
 			a.className = 'option';
 		}
-		a.textContent = setting.switchVals[auto[setting.name]];
+		if (setting.onValue !== undefined) {
+			a.textContent = setting.switchVals[auto[setting.name] ? 1 : 0];
+		} else {
+			a.textContent = setting.switchVals[auto[setting.name]];
+		}
 		a.id = auto.name + ' ' + setting.name + ' Switch';
 		a.onclick = function() {
-			auto[setting.name]++;
-			auto[setting.name] %= setting.switchVals.length;
-			l(auto.name + ' ' + setting.name + ' Switch').textContent = setting.switchVals[auto[setting.name]];
+			if (setting.onValue !== undefined) {
+				auto[setting.name] = auto[setting.name] ? 0 : setting.onValue;
+			} else {
+				auto[setting.name]++;
+				auto[setting.name] %= setting.switchVals.length;
+			}
+			l(auto.name + ' ' + setting.name + ' Switch').textContent = setting.switchVals[setting.onValue !== undefined ? (auto[setting.name] ? 1 : 0) : auto[setting.name]];
 			if(setting.zeroOff) {
 				if (!auto[setting.name]) {l(auto.name + ' ' + setting.name + ' Switch').className = 'option off'}
-				else if (auto[setting.name] === 1) {l(auto.name + ' ' + setting.name + ' Switch').className = 'option'}
+				else {l(auto.name + ' ' + setting.name + ' Switch').className = 'option'}
 			}
+			if (setting.name === 'Interval') {auto.run();}
 			PlaySound('snd/tick.mp3');
 		}
-			if (setting.name === 'Interval') {auto.run();}
 		frag.appendChild(a);
 		
 		// Add a label containing the setting description and append it to the fragment.
