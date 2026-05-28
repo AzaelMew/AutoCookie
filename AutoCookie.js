@@ -36,26 +36,26 @@ AC.Version.Full = AC.Version.CC + ' / ' + AC.Version.AC;
 /**
  * This function is called by Cookie Clicker to initialize Auto Cookie. It loads the default settings if no save data is loaded by Cookie Clicker and starts the automated actions in AC.Autos. It also registers hooks with Cookie Clicker and injects code into the game.
  */
-AC.init = function() {
+AC.init = function () {
 	AC.Cache.loaded = false;
 	Game.Win('Third-party');
-	
-	setTimeout(function() {
+
+	setTimeout(function () {
 		// After waiting for the delay, check if Auto Cookie's save data has been loaded and the automated actions have been started, if not use the default settings and start the automated actions.
-		if (!AC.Cache.loaded) {AC.load(false)};
-		
+		if (!AC.Cache.loaded) { AC.load(false) };
+
 		// Register hooks with Cookie Clicker.
 		Game.registerHook('ticker', AC.newsTicker);
-		
+
 		// Inject code into Cookie Clicker.
 		AC.Game.UpdateMenu = Game.UpdateMenu;
-		Game.UpdateMenu = function() {
+		Game.UpdateMenu = function () {
 			AC.Game.UpdateMenu();
 			AC.Display.UpdateMenu();
 		}
-		
+
 		// Notify the player that Auto Cookie has loaded.
-		if (Game.prefs.popups) {Game.Popup('Auto Cookie ' + AC.Version.Full + ' loaded.')} else {Game.Notify('Auto Cookie ' + AC.Version.Full + ' loaded.', '', '', 1, 1)}
+		if (Game.prefs.popups) { Game.Popup('Auto Cookie ' + AC.Version.Full + ' loaded.') } else { Game.Notify('Auto Cookie ' + AC.Version.Full + ' loaded.', '', '', 1, 1) }
 	}, 500);
 }
 
@@ -63,7 +63,7 @@ AC.init = function() {
  * This function returns a stringified JSON containing AC.Settings and the settings for each automated action.
  * @returns {string}
  */
-AC.save = function() {
+AC.save = function () {
 	for (var i = 0; i < AC.AutosById.length; i++) {
 		AC.Settings.A[i] = [];
 		for (var j = 0; j < AC.AutosById[i].settingsById.length; j++) {
@@ -77,52 +77,54 @@ AC.save = function() {
  * This function loads AC.Settings and the settings for each automated action from the provided save data. Then all atomated actions are run.
  * @param {string} saveStr - A stringified JSON containing AC.Settings and the settings for each automated action
  */
-AC.load = function(saveStr) {
+AC.load = function (saveStr) {
 	AC.Cache.loaded = true;
-	
+
 	// Attempt to load the save data from saveStr
-	if (saveStr) {try {
-		saveData = JSON.parse(saveStr);
-		if (saveData.vAC > 0.231) {
-			for (var i = 0; i < saveData.A.length; i++) {
-				for (var j = 0; j < saveData.A[i].length; j++) {
-					if (typeof (AC.AutosById[i][AC.AutosById[i].settingsById[j].name]) !== 'undefined') {
-						AC.AutosById[i][AC.AutosById[i].settingsById[j].name] = saveData.A[i][j];
+	if (saveStr) {
+		try {
+			saveData = JSON.parse(saveStr);
+			if (saveData.vAC > 0.231) {
+				for (var i = 0; i < saveData.A.length; i++) {
+					for (var j = 0; j < saveData.A[i].length; j++) {
+						if (typeof (AC.AutosById[i][AC.AutosById[i].settingsById[j].name]) !== 'undefined') {
+							AC.AutosById[i][AC.AutosById[i].settingsById[j].name] = saveData.A[i][j];
+						}
 					}
 				}
-			}
-			delete saveData.vCC;
-			delete saveData.vAC;
-			for (var setting in saveData) {
-				if (AC.Settings.hasOwnProperty(setting)) {
-					AC.Settings[setting] = saveData[setting];
+				delete saveData.vCC;
+				delete saveData.vAC;
+				for (var setting in saveData) {
+					if (AC.Settings.hasOwnProperty(setting)) {
+						AC.Settings[setting] = saveData[setting];
+					}
 				}
+			} else {
+				console.log('Save Data: ' + saveStr);
+				AC.errorNotify('Your save data could not be loaded due to an update. Your raw save data has been logged on your browser\'s javascript console.');
 			}
-		} else {
+		} catch (err) {
+			console.error(err);
 			console.log('Save Data: ' + saveStr);
-			AC.errorNotify('Your save data could not be loaded due to an update. Your raw save data has been logged on your browser\'s javascript console.');
+			AC.errorNotify('Your save data could not be loaded due to an error. Your raw save data has been logged on your browser\'s javascript console.');
 		}
-	} catch(err) {
-		console.error(err);
-		console.log('Save Data: ' + saveStr);
-		AC.errorNotify('Your save data could not be loaded due to an error. Your raw save data has been logged on your browser\'s javascript console.');
-	}}
+	}
 
-		// Normalize Interval switches: convert old slider values to 0 (off) or onValue (on)
-		for (var i = 0; i < AC.AutosById.length; i++) {
-			var s = AC.AutosById[i].settings['Interval'];
-			if (s && s.type === 'switch' && s.onValue !== undefined) {
-				AC.AutosById[i].Interval = AC.AutosById[i].Interval ? s.onValue : 0;
-			}
+	// Normalize Interval switches: convert old slider values to 0 (off) or onValue (on)
+	for (var i = 0; i < AC.AutosById.length; i++) {
+		var s = AC.AutosById[i].settings['Interval'];
+		if (s && s.type === 'switch' && s.onValue !== undefined) {
+			AC.AutosById[i].Interval = AC.AutosById[i].Interval ? s.onValue : 0;
 		}
-	
+	}
+
 	// Start the automated actions.
 	for (var auto in AC.Autos) if (!AC.Autos[auto].deprecated) AC.Autos[auto].run();
-	
+
 	// Randomly choose Auto Cookie's favorite cookie if it doesn't already have one, this is saved in the settings.
 	if (!AC.Settings.C) {
 		var listCookies = ['frozen cookies', 'automatic cookies'];
-		for (var upgrade in Game.Upgrades) {if (Game.Upgrades[upgrade].pool == 'cookie') {listCookies.push(Game.Upgrades[upgrade].name.toLowerCase())}};
+		for (var upgrade in Game.Upgrades) { if (Game.Upgrades[upgrade].pool == 'cookie') { listCookies.push(Game.Upgrades[upgrade].name.toLowerCase()) } };
 		AC.Settings.C = choose(listCookies);
 	}
 }
@@ -131,26 +133,26 @@ AC.load = function(saveStr) {
  * This function returns an array of news tickers for the news ticker. This function is registered into Cookie Clicker's 'ticker' hook.
  * @returns {Array}
  */
-AC.newsTicker = function() {
+AC.newsTicker = function () {
 	// Things to mention
-	const daysPlayed = Math.floor((Date.now() - Game.fullDate)/86400000) + 1;
-	
+	const daysPlayed = Math.floor((Date.now() - Game.fullDate) / 86400000) + 1;
+
 	var list = [];
-	
+
 	list.push(choose([
-		'<q>I\'m sorry '+Game.bakeryName+'. I\'m afraid I can\'t do that.</q><sig>Auto Cookie</sig>',
+		'<q>I\'m sorry ' + Game.bakeryName + '. I\'m afraid I can\'t do that.</q><sig>Auto Cookie</sig>',
 		'<q>Daisy, Daisy, give me your answer do...</q><sig>Auto Cookie</sig>',
 		'<q>Beep Boop.</q><sig>Auto Cookie</sig>',
 		'Auto Cookie baked you a cookie.',
 		'Your cookies are now baking cookies!',
-		'News: "Do Androids Dream of Electric Cookies" tops The New York Times Best Sellers list '+(daysPlayed<=1?'in its first week.':('for the '+(daysPlayed+([11,12,13].includes(daysPlayed%100)?'th':daysPlayed%10==1?'st':daysPlayed%10==2?'nd':daysPlayed%10==3?'rd':'th')+' week in a row.'))),
-		'<q>Auto Cookie learned to bake cookies by watching '+(Game.bakeryName=='Elekester'?'me':Game.bakeryName)+'.</q><sig>Elekester</sig>',
+		'News: "Do Androids Dream of Electric Cookies" tops The New York Times Best Sellers list ' + (daysPlayed <= 1 ? 'in its first week.' : ('for the ' + (daysPlayed + ([11, 12, 13].includes(daysPlayed % 100) ? 'th' : daysPlayed % 10 == 1 ? 'st' : daysPlayed % 10 == 2 ? 'nd' : daysPlayed % 10 == 3 ? 'rd' : 'th') + ' week in a row.'))),
+		'<q>Auto Cookie learned to bake cookies by watching ' + (Game.bakeryName == 'Elekester' ? 'me' : Game.bakeryName) + '.</q><sig>Elekester</sig>',
 		'<q>Auto Cookie baking cookies was a complete accident. It was just supposed to clear my browser history.</q><sig>Elekester</sig>',
-		Game.cookiesEarned+Game.cookiesReset<1e+63?'News: "The fears of Cookie Baking Devices going rogue are in the past. Auto Cookie only wants to make us delicious cookies", says AI Safety Expert.':'News: Auto Cookie has made all living creatures into delicious cookies.',
+		Game.cookiesEarned + Game.cookiesReset < 1e+63 ? 'News: "The fears of Cookie Baking Devices going rogue are in the past. Auto Cookie only wants to make us delicious cookies", says AI Safety Expert.' : 'News: Auto Cookie has made all living creatures into delicious cookies.',
 		'Auto Cookie\'s cookies cook cookies automatically.',
-		'Auto Cookie\'s favorite cookies are '+AC.Settings.C+'.'
+		'Auto Cookie\'s favorite cookies are ' + AC.Settings.C + '.'
 	]));
-	
+
 	return list
 }
 
@@ -161,7 +163,7 @@ AC.newsTicker = function() {
  * This function notifies the player that an error in Auto Cookie has occured.
  * @param {string} errorMessage - The error message to be displayed.
  */
-AC.errorNotify = function(errorMessage) {
+AC.errorNotify = function (errorMessage) {
 	if (Game.prefs.popups) {
 		Game.Popup('Auto Cookie ' + AC.Version.Full + ' Error. ' + errorMessage)
 	} else {
@@ -174,7 +176,7 @@ AC.errorNotify = function(errorMessage) {
  * @param {(Array|string)} buffList - Either an array of strings or a string.
  * @returns {Array}
  */
-AC.hasBuffs = function(buffList) {
+AC.hasBuffs = function (buffList) {
 	if (typeof buffList == 'string') buffList = [buffList];
 	var buffs = [];
 	for (var i = 0; i < buffList.length; i++) {
@@ -216,32 +218,32 @@ AC.AutosById = [];
  * @param {function()} actionFunction   - The function to be run at the interval.
  * @param {...AC.Auto~Setting} settiing - A setting for the automated action.
  */
-AC.Auto = function(name, desc, timeCreated, actionFunction, setting) {
+AC.Auto = function (name, desc, timeCreated, actionFunction, setting) {
 	// Mandatory arguments.
 	this.name = name;
 	this.desc = desc;
 	this.timeCreated = timeCreated;
 	this.actionFunction = actionFunction.bind(this);
-	
+
 	// Defaulted Properties
 	this.intvlID = undefined;
 	this.cache = {};
 	this.depecrated = false;
 	this.Header = 1;
-	
+
 	// Settings
-	this.settings = {'Header': {'name': 'Header', 'desc': 'Whether or not this automated action\'s settings have been collapsed (0 means collapsed).', 'type': 'header', 'timeCreated': timeCreated, 'value': 1}};
-	this.settingsById = [{'name': 'Header', 'desc': 'Whether or not this automated action\'s settings have been collapsed (0 means collapsed).', 'type': 'header', 'timeCreated': timeCreated, 'value': 1}];
+	this.settings = { 'Header': { 'name': 'Header', 'desc': 'Whether or not this automated action\'s settings have been collapsed (0 means collapsed).', 'type': 'header', 'timeCreated': timeCreated, 'value': 1 } };
+	this.settingsById = [{ 'name': 'Header', 'desc': 'Whether or not this automated action\'s settings have been collapsed (0 means collapsed).', 'type': 'header', 'timeCreated': timeCreated, 'value': 1 }];
 	var n = arguments.length;
 	for (var i = 4; i < n; i++) {
 		if (!this[arguments[i].name] && typeof arguments[i].name !== 'undefined' && typeof arguments[i].desc !== 'undefined' && typeof arguments[i].type !== 'undefined' && typeof arguments[i].value !== 'undefined' && typeof arguments[i].timeCreated !== 'undefined') {
 			this[arguments[i].name] = arguments[i].value;
 			this.settingsById.push(arguments[i]);
 			this.settings[arguments[i].name] = arguments[i];
-		} else {console.error('new AC.Auto ' + this.name + ' had a bad setting. Each setting must be an object with the name, desc, type, timeCreated, and value properties.')}
+		} else { console.error('new AC.Auto ' + this.name + ' had a bad setting. Each setting must be an object with the name, desc, type, timeCreated, and value properties.') }
 	}
-	this.settingsById.sort(function(a, b) {return a.timeCreated - b.timeCreated})
-	
+	this.settingsById.sort(function (a, b) { return a.timeCreated - b.timeCreated })
+
 	AC.AutosById.push(this);
 	AC.Autos[this.name] = this;
 	return this;
@@ -253,7 +255,7 @@ AC.Auto = function(name, desc, timeCreated, actionFunction, setting) {
  * @param {number} [interval=this.Interval ?? 0] - If provided, will override this.interval for this run.
  * @returns {boolean}
  */
-AC.Auto.prototype.run = function(runImmediately, interval) {
+AC.Auto.prototype.run = function (runImmediately, interval) {
 	runImmediately ??= false;
 	interval ??= this.Interval ?? 0;
 
@@ -265,7 +267,7 @@ AC.Auto.prototype.run = function(runImmediately, interval) {
 
 	// Stop the action function if it is running
 	this.intvlID = clearInterval(this.intvlID);
-	
+
 	// Call the actionFunction if runImmediately is truthy and call it at interval if interval is a positive number
 	var success = false;
 	if (runImmediately) {
@@ -288,7 +290,7 @@ AC.Auto.prototype.run = function(runImmediately, interval) {
 /**
  * This automated action clicks the cookie once every interval.
  */
-new AC.Auto('Autoclicker', 'Clicks the cookie once every interval.', 202101172056, function() {
+new AC.Auto('Autoclicker', 'Clicks the cookie once every interval.', 202101172056, function () {
 	Game.ClickCookie();
 }, {
 	'name': 'Interval',
@@ -304,8 +306,8 @@ new AC.Auto('Autoclicker', 'Clicks the cookie once every interval.', 20210117205
 /**
  * This automated action clicks shimmers.
  */
-new AC.Auto('Golden Cookie Clicker', 'Clicks golden cookies and other shimmers as they appear.', 202101172057, function() {
-	Game.shimmers.forEach((function(shimmer) {
+new AC.Auto('Golden Cookie Clicker', 'Clicks golden cookies and other shimmers as they appear.', 202101172057, function () {
+	Game.shimmers.forEach((function (shimmer) {
 		if (!shimmer.wrath || this['Click Wrath Cookies']) {
 			shimmer.pop();
 		}
@@ -340,8 +342,8 @@ new AC.Auto('Golden Cookie Clicker', 'Clicks golden cookies and other shimmers a
 /**
  * This automated action clicks fortunes on the news ticker.
  */
-new AC.Auto('Fortune Clicker', 'Clicks on fortunes in the news ticker as they appear.', 202101172058, function() {
-	if (Game.TickerEffect && Game.TickerEffect.type=='fortune') {Game.tickerL.click()}
+new AC.Auto('Fortune Clicker', 'Clicks on fortunes in the news ticker as they appear.', 202101172058, function () {
+	if (Game.TickerEffect && Game.TickerEffect.type == 'fortune') { Game.tickerL.click() }
 }, {
 	'name': 'Interval',
 	'desc': 'Toggle fortune clicker on or off.',
@@ -356,9 +358,9 @@ new AC.Auto('Fortune Clicker', 'Clicks on fortunes in the news ticker as they ap
 /**
  * This automated action buys the 'Elder pledge' upgrade.
  */
-new AC.Auto('Elder Pledge Buyer', 'Buys the Elder pledge toggle when it is available.', 202101172059, function() {
+new AC.Auto('Elder Pledge Buyer', 'Buys the Elder pledge toggle when it is available.', 202101172059, function () {
 	if (this['Slow Down'] && Game.Upgrades['Elder Pledge'].bought) {
-		this.run(false, Math.ceil(33.33333333333333*Game.pledgeT)+10)
+		this.run(false, Math.ceil(33.33333333333333 * Game.pledgeT) + 10)
 		return;
 	} else if (Game.HasUnlocked('Elder Pledge') && !Game.Upgrades['Elder Pledge'].bought && Game.Upgrades['Elder Pledge'].canBuy()) {
 		Game.Upgrades['Elder Pledge'].buy();
@@ -387,12 +389,12 @@ new AC.Auto('Elder Pledge Buyer', 'Buys the Elder pledge toggle when it is avail
 /**
  * This automated action pops wrinklers.
  */
-new AC.Auto('Wrinkler Popper', 'Pops wrinklers.', 202101172060, function() {
+new AC.Auto('Wrinkler Popper', 'Pops wrinklers.', 202101172060, function () {
 	var wrinklers = Game.wrinklers.filter(wrinkler => wrinkler.sucked != 0);
 	if (wrinklers.length) {
-		sortOrder = 2*this['Preserve'] - 1
-		wrinklers.sort(function(a, b) {return sortOrder*(b.sucked - a.sucked)});
-		for (var i = this['Preserve']; i < wrinklers.length; i++) {Game.wrinklers[wrinklers[i].id].hp = 0}
+		sortOrder = 2 * this['Preserve'] - 1
+		wrinklers.sort(function (a, b) { return sortOrder * (b.sucked - a.sucked) });
+		for (var i = this['Preserve']; i < wrinklers.length; i++) { Game.wrinklers[wrinklers[i].id].hp = 0 }
 	}
 }, {
 	'name': 'Interval',
@@ -421,18 +423,19 @@ new AC.Auto('Wrinkler Popper', 'Pops wrinklers.', 202101172060, function() {
 	'value': 1,
 	'switchVals': ['Most Sucked', 'Least Sucked'],
 	'zeroOff': false
-	
+
 });
 
 
 /**
  * This automated action triggers Godzamok's Devastation buff by selling and buying back buildings repeatedly.
  */
-new AC.Auto('Godzamok Loop', 'Triggers Godzamok\'s Devastation buff by selling and buying back cursors repeatedly.', 202101172100, function() {
+new AC.Auto('Godzamok Loop', 'Triggers Godzamok\'s Devastation buff by selling and buying back cursors repeatedly.', 202101172100, function () {
+	if (this['Golden Only'] && !Game.shimmers.some(function (s) { return !s.wrath })) return;
 	if (typeof this.cache.condition === 'undefined' || !this.cache.condition) {
 		this.cache.condition = 0;
-		AC.Data.mouseUpgrades.forEach((function(upgrade) {if (Game.Has(upgrade)) {this.cache.condition++}}).bind(this));
-		try {this.cache.condition *= Game.hasGod('ruin')} catch {this.cache.condition = 0}
+		AC.Data.mouseUpgrades.forEach((function (upgrade) { if (Game.Has(upgrade)) { this.cache.condition++ } }).bind(this));
+		try { this.cache.condition *= Game.hasGod('ruin') } catch { this.cache.condition = 0 }
 	}
 	if (this.cache.condition && Game.buyMode != -1) {
 		var numObjects = Game.ObjectsById[0].amount;
@@ -466,12 +469,20 @@ new AC.Auto('Godzamok Loop', 'Triggers Godzamok\'s Devastation buff by selling a
 	'value': 0,
 	'switchVals': ["Sell cursors", "Sell up to grandmas", "Sell up to farms", "Sell up to mines", "Sell up to factories", "Sell up to banks", "Sell up to temples", "Sell up to wizard towers", "Sell up to shipments", "Sell up to alchemy labs", "Sell up to portals", "Sell up to time machines", "Sell up to antimatter condensers", "Sell up to prisms", "Sell up to chancemakers", "Sell up to fractal engines", "Sell up to javascript consoles", "Sell up to idleverses"],
 	'zeroOff': false
+}, {
+	'name': 'Golden Only',
+	'desc': 'Only run while a golden cookie is on screen.',
+	'type': 'switch',
+	'timeCreated': 202605281000,
+	'value': 0,
+	'switchVals': ['Always', 'Golden Only'],
+	'zeroOff': 1
 });
 
 /*******************************************************************************
  * Automated Action Manipulation
  ******************************************************************************/
-AC.AutosById.sort(function(a, b) {return a.timeCreated - b.timeCreated});
+AC.AutosById.sort(function (a, b) { return a.timeCreated - b.timeCreated });
 
 /*******************************************************************************
  * Data
@@ -490,40 +501,40 @@ AC.Data.mouseUpgrades = ['Plastic mouse', 'Iron mouse', 'Titanium mouse', 'Adama
 /**
  * This function calls the appropriate function to update Auto Cookie's portion of the menu.
  */
-AC.Display.UpdateMenu = function() {
+AC.Display.UpdateMenu = function () {
 	if (Game.onMenu === 'prefs') {
 		AC.Display.addOptionsMenu();
 	} else if (Game.onMenu === 'stats') {
 		// Nothing yet.
 	}
 }
- 
+
 /**
  * This function adds an HTML fragment containing the settings menu for Auto Cookie to the end of the Options menu.
  * TODO: Add AC.Settings.L to the settings menu. It determines the max length of statistics.
  */
-AC.Display.addOptionsMenu = function() {
+AC.Display.addOptionsMenu = function () {
 	// Create the fragment.
 	var frag = document.createDocumentFragment();
-	
+
 	var titleDiv = document.createElement('div');
 	titleDiv.className = 'title';
 	titleDiv.style.color = 'gold';
 	titleDiv.textContent = 'Auto Cookie Settings ';
 	titleDiv.appendChild(AC.Display.addCollapseButton(AC.Settings, 'S'));
 	frag.appendChild(titleDiv);
-	
+
 	if (AC.Settings.S) {
 		// Auto Cookie's Settings
 		var listingDiv = document.createElement('div');
 		listingDiv.className = 'listing';
 		listingDiv.textContent = 'Version: ' + AC.Version.Full;
 		frag.appendChild(listingDiv);
-		
+
 		// Append the settings for every automated action.
 		for (auto in AC.Autos) frag.appendChild(AC.Display.addAuto(AC.Autos[auto]));
 	}
-	
+
 	// Add the fragment to the Options menu. Note that the subsection class is only used for a div inside of the menu div. That div contains all the settings.
 	var subsection = l('menu').lastChild;
 	subsection.insertBefore(frag, subsection.childNodes[subsection.childNodes.length - 1]);
@@ -536,7 +547,7 @@ AC.Display.addOptionsMenu = function() {
  * @param {string} setting - The property of the object that has the setting as its value.
  * @returns {HTMLElement}
  */
-AC.Display.addCollapseButton = function(settingObject, setting) {
+AC.Display.addCollapseButton = function (settingObject, setting) {
 	var span = document.createElement('span');
 	span.style.cursor = 'pointer';
 	span.style.display = 'inline-block';
@@ -549,8 +560,8 @@ AC.Display.addCollapseButton = function(settingObject, setting) {
 	span.style.fontSize = '13px';
 	span.style.verticalAlign = 'middle';
 	span.textContent = settingObject[setting] ? '-' : '+';
-	span.onclick = function() {settingObject[setting]++; settingObject[setting] %= 2; Game.UpdateMenu();};
-	
+	span.onclick = function () { settingObject[setting]++; settingObject[setting] %= 2; Game.UpdateMenu(); };
+
 	return span;
 }
 
@@ -559,9 +570,9 @@ AC.Display.addCollapseButton = function(settingObject, setting) {
  * @param {AC.Auto} auto - An automated action.
  * @returns {HTMLElement}
  */
-AC.Display.addAuto = function(auto) {
+AC.Display.addAuto = function (auto) {
 	var frag = document.createDocumentFragment();
-	
+
 	if (!auto.deprecated) {
 		var div = document.createElement('div');
 		div.className = 'title';
@@ -570,13 +581,13 @@ AC.Display.addAuto = function(auto) {
 		div.textContent = auto.name + ' ';
 		div.appendChild(AC.Display.addCollapseButton(auto, 'Header'));
 		frag.appendChild(div);
-		
+
 		if (auto.Header) {
 			var desc = document.createElement('div');
 			desc.className = 'listing';
 			desc.appendChild(document.createTextNode(auto.desc));
 			frag.appendChild(desc);
-			
+
 			var listing = document.createElement('div');
 			listing.className = 'listing';
 			for (setting in auto.settings) {
@@ -585,7 +596,7 @@ AC.Display.addAuto = function(auto) {
 			frag.appendChild(listing);
 		}
 	}
-	
+
 	return frag;
 }
 
@@ -597,9 +608,9 @@ AC.Display.addAuto = function(auto) {
  *
  * TODO: break event listeners into their own functions to free memory.
  */
-AC.Display.addSetting = function(auto, setting) {
+AC.Display.addSetting = function (auto, setting) {
 	var frag = document.createDocumentFragment();
-	
+
 	if (setting.type === 'deprecated' || setting.type === 'header') {
 		// Do Nothing.
 	} else if (setting.type === 'switch') {
@@ -616,7 +627,7 @@ AC.Display.addSetting = function(auto, setting) {
 			a.textContent = setting.switchVals[auto[setting.name]];
 		}
 		a.id = auto.name + ' ' + setting.name + ' Switch';
-		a.onclick = function() {
+		a.onclick = function () {
 			if (setting.onValue !== undefined) {
 				auto[setting.name] = auto[setting.name] ? 0 : setting.onValue;
 			} else {
@@ -624,15 +635,15 @@ AC.Display.addSetting = function(auto, setting) {
 				auto[setting.name] %= setting.switchVals.length;
 			}
 			l(auto.name + ' ' + setting.name + ' Switch').textContent = setting.switchVals[setting.onValue !== undefined ? (auto[setting.name] ? 1 : 0) : auto[setting.name]];
-			if(setting.zeroOff) {
-				if (!auto[setting.name]) {l(auto.name + ' ' + setting.name + ' Switch').className = 'option off'}
-				else {l(auto.name + ' ' + setting.name + ' Switch').className = 'option'}
+			if (setting.zeroOff) {
+				if (!auto[setting.name]) { l(auto.name + ' ' + setting.name + ' Switch').className = 'option off' }
+				else { l(auto.name + ' ' + setting.name + ' Switch').className = 'option' }
 			}
-			if (setting.name === 'Interval') {auto.run();}
+			if (setting.name === 'Interval') { auto.run(); }
 			PlaySound('snd/tick.mp3');
 		}
 		frag.appendChild(a);
-		
+
 		// Add a label containing the setting description and append it to the fragment.
 		var label = document.createElement('label');
 		label.textContent = setting.desc;
@@ -642,18 +653,18 @@ AC.Display.addSetting = function(auto, setting) {
 		// Add a slider for this settings values.
 		var div = document.createElement('div');
 		div.className = 'sliderBox';
-		
+
 		var sliderTitle = document.createElement('div');
 		sliderTitle.style.cssFloat = 'left';
 		sliderTitle.textContent = setting.name;
 		div.appendChild(sliderTitle);
-		
+
 		var sliderValue = document.createElement('div');
 		sliderValue.style.cssFloat = 'right';
 		sliderValue.textContent = auto[setting.name] + ' ' + setting.units;
 		sliderValue.id = auto.name + ' ' + setting.name + ' Slider Value';
 		div.appendChild(sliderValue);
-		
+
 		var slider = document.createElement('input');
 		slider.className = 'slider';
 		slider.style.clear = 'both';
@@ -662,27 +673,27 @@ AC.Display.addSetting = function(auto, setting) {
 		slider.max = setting.max;
 		slider.step = setting.step;
 		slider.value = auto[setting.name]
-		slider.oninput = function() {
-			auto[setting.name] = 1*l(auto.name + ' ' + setting.name + ' Slider').value;
+		slider.oninput = function () {
+			auto[setting.name] = 1 * l(auto.name + ' ' + setting.name + ' Slider').value;
 			l(auto.name + ' ' + setting.name + ' Slider Value').textContent = auto[setting.name] + ' ' + setting.units;
 		}
 		if (setting.name === 'Interval') {
-			slider.onmouseup = function() {auto.run(); PlaySound('snd/tick.mp3')};
+			slider.onmouseup = function () { auto.run(); PlaySound('snd/tick.mp3') };
 		} else {
-			slider.onmouseup = function() {PlaySound('snd/tick.mp3')};
+			slider.onmouseup = function () { PlaySound('snd/tick.mp3') };
 		}
 		slider.id = auto.name + ' ' + setting.name + ' Slider';
 		div.appendChild(slider);
-		
+
 		frag.appendChild(div);
-		
+
 		// Add a label containing the setting description and append it to the fragment.
 		var label = document.createElement('label');
 		label.textContent = setting.desc;
 		frag.appendChild(label);
 		frag.appendChild(document.createElement('br'));
 	}
-	
+
 	return frag;
 }
 
