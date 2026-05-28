@@ -107,6 +107,14 @@ AC.load = function(saveStr) {
 		console.log('Save Data: ' + saveStr);
 		AC.errorNotify('Your save data could not be loaded due to an error. Your raw save data has been logged on your browser\'s javascript console.');
 	}}
+
+		// Normalize Interval switches: convert old slider values to 0 (off) or onValue (on)
+		for (var i = 0; i < AC.AutosById.length; i++) {
+			var s = AC.AutosById[i].settings['Interval'];
+			if (s && s.type === 'switch' && s.onValue !== undefined) {
+				AC.AutosById[i].Interval = AC.AutosById[i].Interval ? s.onValue : 0;
+			}
+		}
 	
 	// Start the automated actions.
 	for (var auto in AC.Autos) if (!AC.Autos[auto].deprecated) AC.Autos[auto].run();
