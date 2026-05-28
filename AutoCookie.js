@@ -291,6 +291,7 @@ new AC.Auto('Autoclicker', 'Clicks the cookie once every interval.', 20210117205
 	'switchVals': ['Off', 'On'],
 	'zeroOff': 1,
 	'onValue': 1
+});
 
 /**
  * This automated action clicks shimmers.
