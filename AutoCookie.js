@@ -249,9 +249,9 @@ AC.Auto.prototype.run = function(runImmediately, interval) {
 	runImmediately ??= false;
 	interval ??= this.Interval ?? 0;
 
-	// Clamp interval to the slider's min/max so old save data can't push it out of range
+	// Clamp interval to min/max if the setting has them (sliders, not switches)
 	var s = this.settings['Interval'];
-	if (s && typeof interval === 'number' && interval > 0) {
+	if (s && s.min !== undefined && s.max !== undefined && typeof interval === 'number' && interval > 0) {
 		interval = Math.max(s.min, Math.min(s.max, interval));
 	}
 
@@ -284,14 +284,12 @@ new AC.Auto('Autoclicker', 'Clicks the cookie once every interval.', 20210117205
 	Game.ClickCookie();
 }, {
 	'name': 'Interval',
-	'desc': 'How often the cookie is clicked. Lower = faster clicks.',
-	'type': 'slider',
+	'desc': 'Toggle autoclicker on or off.',
+	'type': 'switch',
 	'timeCreated': 202101172101,
 	'value': 1,
-	'units': 'ms',
-	'min': 0,
-	'max': 500,
-	'step': 1
+	'switchVals': ['Off', 'On'],
+	'zeroOff': 1
 });
 
 /**
@@ -620,6 +618,7 @@ AC.Display.addSetting = function(auto, setting) {
 			}
 			PlaySound('snd/tick.mp3');
 		}
+			if (setting.name === 'Interval') {auto.run();}
 		frag.appendChild(a);
 		
 		// Add a label containing the setting description and append it to the fragment.
