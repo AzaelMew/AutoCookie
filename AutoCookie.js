@@ -14,7 +14,7 @@ var AC = {
 	'Settings': {},	// Settings
 	'Version': {	// Version Information
 		'CC': '2.052',
-		'AC': '0.259',
+		'AC': '0.260',
 	}
 }
 
@@ -42,7 +42,7 @@ AC.init = function () {
 
 	setTimeout(function () {
 		// After waiting for the delay, check if Auto Cookie's save data has been loaded and the automated actions have been started, if not use the default settings and start the automated actions.
-		if (!AC.Cache.loaded) { AC.load(false) };
+		if (!AC.Cache.loaded) { AC.load(localStorage.AutoCookie_backup || false) };
 
 		// Register hooks with Cookie Clicker.
 		Game.registerHook('ticker', AC.newsTicker);
@@ -70,7 +70,9 @@ AC.save = function () {
 			AC.Settings.A[i].push(AC.AutosById[i][AC.AutosById[i].settingsById[j].name]);
 		}
 	}
-	return JSON.stringify(AC.Settings);
+	var saveStr = JSON.stringify(AC.Settings);
+	localStorage.AutoCookie_backup = saveStr;
+	return saveStr;
 }
 
 /**
