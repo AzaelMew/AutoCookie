@@ -431,7 +431,7 @@ new AC.Auto('Wrinkler Popper', 'Pops wrinklers.', 202101172060, function () {
  * This automated action triggers Godzamok's Devastation buff by selling and buying back buildings repeatedly.
  */
 new AC.Auto('Godzamok Loop', 'Triggers Godzamok\'s Devastation buff by selling and buying back cursors repeatedly.', 202101172100, function () {
-	if (this['Golden Only'] && !Game.shimmers.some(function (s) { return !s.wrath })) return;
+	if (this['Golden Only'] && !AC.hasBuffs(AC.Data.cpsBuffs).length) return;
 	if (typeof this.cache.condition === 'undefined' || !this.cache.condition) {
 		this.cache.condition = 0;
 		AC.Data.mouseUpgrades.forEach((function (upgrade) { if (Game.Has(upgrade)) { this.cache.condition++ } }).bind(this));
@@ -471,7 +471,7 @@ new AC.Auto('Godzamok Loop', 'Triggers Godzamok\'s Devastation buff by selling a
 	'zeroOff': false
 }, {
 	'name': 'Golden Only',
-	'desc': 'Only run while a golden cookie is on screen.',
+	'desc': 'Only run while a CPS buff is active.',
 	'type': 'switch',
 	'timeCreated': 202605281000,
 	'value': 0,
@@ -490,7 +490,7 @@ AC.AutosById.sort(function (a, b) { return a.timeCreated - b.timeCreated });
 AC.Data.mouseUpgrades = ['Plastic mouse', 'Iron mouse', 'Titanium mouse', 'Adamantium mouse', 'Unobtainium mouse', 'Eludium mouse', 'Wishalloy mouse', 'Fantasteel mouse', 'Nevercrack mouse', 'Armythril mouse', 'Technobsidian mouse', 'Plasmarble mouse', 'Miraculite mouse', 'Aetherice mouse', 'Omniplast mouse', 'Fortune #104'];
 
 // Doesn't include 'Sugar frenzy' (due to the minor benefit).
-// AC.Data.cpsBuffs = ["High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up", "Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms", "Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles", "Solar flare", "Winning streak", "Macrocosm", "Refactoring", "Cosmic nursery", "Frenzy", "Elder Frenzy", "Dragon Harvest"];
+AC.Data.cpsBuffs = ["High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up", "Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms", "Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles", "Solar flare", "Winning streak", "Macrocosm", "Refactoring", "Cosmic nursery", "Frenzy", "Elder Frenzy", "Dragon Harvest"];
 
 // Doesn't include 'Cursed finger' (since it is also a CPS debuff) or 'Devastation' (since its trigger is entirely player controlled).
 // AC.Data.clickBuffs = ["Click frenzy", "Dragonflight"];
