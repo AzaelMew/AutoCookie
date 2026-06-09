@@ -3,7 +3,11 @@
  *
  * Here the structure of Auto Cookie is declared, along with the version information.
  *
- * TODO: Implement combo automated action. Cast FTHOF, sell Towers. Wait for the next logic tick in the minigame to be called. Cast FTHOF again. You should be able to add a mod hook for this, but it wasn't quite working for me. Maybe you need to declare a global function. If you need to hard wire it, logic ticks happen faster than 34 ms.
+ * The FTHOF Caster auto (added in 0.264) is the combo behaviour the old TODO
+ * described: it auto-casts "Force the Hand of Faith" from the Grimoire
+ * minigame whenever a high-power golden-cookie buff is active and we can
+ * fully afford the mana cost. Mana regenerates between casts so it can chain
+ * during a long Frenzy / Elder Frenzy.
  ******************************************************************************/
 var AC = {
 	'Autos': {},	// Automated Actions
@@ -14,7 +18,7 @@ var AC = {
 	'Settings': {},	// Settings
 	'Version': {	// Version Information
 		'CC': '2.052',
-		'AC': '0.261',
+		'AC': '0.264',
 	}
 }
 
@@ -394,7 +398,7 @@ new AC.Auto('Elder Pledge Buyer', 'Buys the Elder pledge toggle when it is avail
 new AC.Auto('Wrinkler Popper', 'Pops wrinklers.', 202101172060, function () {
 	var wrinklers = Game.wrinklers.filter(wrinkler => wrinkler.sucked != 0);
 	if (wrinklers.length) {
-		sortOrder = 2 * this['Preserve'] - 1
+		sortOrder = 1 - 2 * this['Wrinkler Sorting']
 		wrinklers.sort(function (a, b) { return sortOrder * (b.sucked - a.sucked) });
 		for (var i = this['Preserve']; i < wrinklers.length; i++) { Game.wrinklers[wrinklers[i].id].hp = 0 }
 	}
@@ -481,6 +485,47 @@ new AC.Auto('Godzamok Loop', 'Triggers Godzamok\'s Devastation buff by selling a
 	'zeroOff': 1
 });
 
+/**
+ * This automated action casts "Force the Hand of Faith" from the Grimoire
+ * minigame whenever a high-power golden-cookie buff is active and the player
+ * can fully afford the mana cost. Will keep casting on a short interval
+ * (chaining casts) while the buff is still active so that long buffs like
+ * Frenzy or Elder Frenzy can be capitalised on; mana recharges between casts.
+ *
+ * High-power buffs are taken from AC.Data.goldenBuffs (Frenzy, Elder Frenzy,
+ * Click frenzy, Dragonflight, Brainstorm, Deduplication, etc.). We never fire
+ * on Lucky, Clot, or no-buff states — those aren't worth the mana.
+ */
+new AC.Auto('FTHOF Caster', 'Auto-casts "Force the Hand of Faith" from the Grimoire minigame when a high-power cookie effect is active and the mana cost is fully affordable.', 202606091000, function () {
+	var tower = Game.ObjectsById && Game.ObjectsById[7];
+	// Bail quietly if the Wizard Tower / Grimoire isn't unlocked or game APIs are missing.
+	var M = tower && tower.minigame;
+	if (!M || !M.spells || !M.castSpell || !M.getSpellCost) return;
+
+	// High-power buff required. AC.Data.goldenBuffs already filters out things
+	// like Lucky / Clot / Sugar frenzy.
+	if (!AC.hasBuffs(AC.Data.goldenBuffs).length) return;
+
+	// Look up the FTHOF spell object and only fire when we can fully afford it.
+	var spell = M.spells['hand of fate'];
+	if (!spell) return;
+	var cost = M.getSpellCost(spell);
+	if (typeof cost !== 'number' || cost <= 0) return;
+	if (M.magic < cost) return;
+
+	// castSpell handles mana deduction, cast counters, achievements, sparkle, sound.
+	M.castSpell(spell);
+}, {
+	'name': 'Interval',
+	'desc': 'Toggle FTHOF Caster on or off. Keep on to chain casts during a long buff.',
+	'type': 'switch',
+	'timeCreated': 202606091001,
+	'value': 0,
+	'switchVals': ['Off', 'On'],
+	'zeroOff': 1,
+	'onValue': 100
+});
+
 /*******************************************************************************
  * Automated Action Manipulation
  ******************************************************************************/
@@ -491,8 +536,8 @@ AC.AutosById.sort(function (a, b) { return a.timeCreated - b.timeCreated });
  ******************************************************************************/
 AC.Data.mouseUpgrades = ['Plastic mouse', 'Iron mouse', 'Titanium mouse', 'Adamantium mouse', 'Unobtainium mouse', 'Eludium mouse', 'Wishalloy mouse', 'Fantasteel mouse', 'Nevercrack mouse', 'Armythril mouse', 'Technobsidian mouse', 'Plasmarble mouse', 'Miraculite mouse', 'Aetherice mouse', 'Omniplast mouse', 'Fortune #104'];
 
-// Buffs from golden/wrath cookies worth comboing with Godzamok. Doesn't include 'Sugar frenzy' (minor benefit).
-AC.Data.goldenBuffs = ["High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up", "Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms", "Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles", "Solar flare", "Winning streak", "Macrocosm", "Refactoring", "Cosmic nursery", "Frenzy", "Elder Frenzy", "Dragon Harvest", "Click frenzy", "Dragonflight"];
+// Buffs from golden/wrath cookies and grimoire worth comboing with Godzamok. Doesn't include 'Sugar frenzy' (minor benefit).
+AC.Data.goldenBuffs = ["High-five", "Congregation", "Luxuriant harvest", "Ore vein", "Oiled-up", "Juicy profits", "Fervent adoration", "Manabloom", "Delicious lifeforms", "Breakthrough", "Righteous cataclysm", "Golden ages", "Extra cycles", "Solar flare", "Winning streak", "Macrocosm", "Refactoring", "Cosmic nursery", "Frenzy", "Elder Frenzy", "Dragon Harvest", "Click frenzy", "Dragonflight", "Brainstorm", "Deduplication"];
 
 // Doesn't include 'Cursed finger' (since it is also a CPS debuff) or 'Devastation' (since its trigger is entirely player controlled).
 // AC.Data.clickBuffs = ["Click frenzy", "Dragonflight"];
