@@ -18,7 +18,7 @@ var AC = {
 	'Settings': {},	// Settings
 	'Version': {	// Version Information
 		'CC': '2.052',
-		'AC': '0.264',
+		'AC': '0.265',
 	}
 }
 
@@ -488,7 +488,8 @@ new AC.Auto('Godzamok Loop', 'Triggers Godzamok\'s Devastation buff by selling a
 /**
  * This automated action casts "Force the Hand of Faith" from the Grimoire
  * minigame whenever a high-power golden-cookie buff is active and the player
- * can fully afford the mana cost. Will keep casting on a short interval
+ * can fully afford the mana cost. It waits 500ms before casting so the combo
+ * has a small reaction delay instead of firing immediately. Will keep casting on a short interval
  * (chaining casts) while the buff is still active so that long buffs like
  * Frenzy or Elder Frenzy can be capitalised on; mana recharges between casts.
  *
@@ -497,6 +498,8 @@ new AC.Auto('Godzamok Loop', 'Triggers Godzamok\'s Devastation buff by selling a
  * on Lucky, Clot, or no-buff states — those aren't worth the mana.
  */
 new AC.Auto('FTHOF Caster', 'Auto-casts "Force the Hand of Faith" from the Grimoire minigame when a high-power cookie effect is active and the mana cost is fully affordable.', 202606091000, function () {
+	if (AC.Cache.FTHOFCasterPending) return;
+
 	var tower = Game.ObjectsById && Game.ObjectsById[7];
 	// Bail quietly if the Wizard Tower / Grimoire isn't unlocked or game APIs are missing.
 	var M = tower && tower.minigame;
@@ -513,8 +516,25 @@ new AC.Auto('FTHOF Caster', 'Auto-casts "Force the Hand of Faith" from the Grimo
 	if (typeof cost !== 'number' || cost <= 0) return;
 	if (M.magic < cost) return;
 
-	// castSpell handles mana deduction, cast counters, achievements, sparkle, sound.
-	M.castSpell(spell);
+	AC.Cache.FTHOFCasterPending = true;
+	setTimeout(function () {
+		AC.Cache.FTHOFCasterPending = false;
+
+		// Re-check everything after the delay; the buff or mana can change in 500ms.
+		var delayedTower = Game.ObjectsById && Game.ObjectsById[7];
+		var delayedM = delayedTower && delayedTower.minigame;
+		if (!delayedM || !delayedM.spells || !delayedM.castSpell || !delayedM.getSpellCost) return;
+		if (!AC.hasBuffs(AC.Data.goldenBuffs).length) return;
+
+		var delayedSpell = delayedM.spells['hand of fate'];
+		if (!delayedSpell) return;
+		var delayedCost = delayedM.getSpellCost(delayedSpell);
+		if (typeof delayedCost !== 'number' || delayedCost <= 0) return;
+		if (delayedM.magic < delayedCost) return;
+
+		// castSpell handles mana deduction, cast counters, achievements, sparkle, sound.
+		delayedM.castSpell(delayedSpell);
+	}, 500);
 }, {
 	'name': 'Interval',
 	'desc': 'Toggle FTHOF Caster on or off. Keep on to chain casts during a long buff.',
